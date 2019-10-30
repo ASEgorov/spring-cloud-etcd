@@ -11,11 +11,16 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-etcd</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
-		<relativePath>../</relativePath>
+		<version>2.2.0.BUILD-SNAPSHOT</version>
+		<relativePath>..</relativePath>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -29,13 +34,34 @@
 			<artifactId>spring-cloud-commons</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aop</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.retry</groupId>
+			<artifactId>spring-retry</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>org.mousio</groupId>
 			<artifactId>etcd4j</artifactId>
 		</dependency>
 		<!-- bug in netty deps? -->
+<!--		<dependency>-->
+<!--			<groupId>io.netty</groupId>-->
+<!--			<artifactId>netty-handler</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-handler</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure-processor</artifactId>
+			<optional>true</optional>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

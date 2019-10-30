@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,19 @@
 
 package org.springframework.cloud.etcd.discovery;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.util.ReflectionUtils;
-
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.Objects;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * @author Spencer Gibb
@@ -78,53 +80,14 @@ public class EtcdDiscoveryProperties {
 				}
 			}
 			return InetAddress.getLocalHost();
-		} catch (UnknownHostException e){
+		}
+		catch (UnknownHostException e) {
 			ReflectionUtils.rethrowRuntimeException(e);
 			return null;
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			log.warn("Unable to find non-loopback address", e);
 			return null;
-		}
-	}
-
-	private class HostInfo {
-		private final String ipAddress;
-		private final String hostname;
-
-		public HostInfo(String ipAddress, String hostname) {
-			this.ipAddress = ipAddress;
-			this.hostname = hostname;
-		}
-
-		public String getIpAddress() {
-			return ipAddress;
-		}
-
-		public String getHostname() {
-			return hostname;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			HostInfo hostInfo = (HostInfo) o;
-
-			if (!ipAddress.equals(hostInfo.ipAddress)) return false;
-			return hostname.equals(hostInfo.hostname);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = ipAddress.hashCode();
-			result = 31 * result + hostname.hashCode();
-			return result;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("HostInfo{ipAddress='%s', hostname='%s'}", ipAddress, hostname);
 		}
 	}
 
@@ -190,20 +153,38 @@ public class EtcdDiscoveryProperties {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
 		EtcdDiscoveryProperties that = (EtcdDiscoveryProperties) o;
 
-		if (enabled != that.enabled) return false;
-		if (preferIpAddress != that.preferIpAddress) return false;
-		if (ttl != that.ttl) return false;
-		if (heartbeatInterval != that.heartbeatInterval) return false;
-		if (discoveryPrefix != null ? !discoveryPrefix.equals(that.discoveryPrefix) : that.discoveryPrefix != null)
+		if (enabled != that.enabled) {
 			return false;
-		if (hostInfo != null ? !hostInfo.equals(that.hostInfo) : that.hostInfo != null) return false;
-		if (ipAddress != null ? !ipAddress.equals(that.ipAddress) : that.ipAddress != null) return false;
-		return hostname != null ? hostname.equals(that.hostname) : that.hostname == null;
+		}
+		if (preferIpAddress != that.preferIpAddress) {
+			return false;
+		}
+		if (ttl != that.ttl) {
+			return false;
+		}
+		if (heartbeatInterval != that.heartbeatInterval) {
+			return false;
+		}
+		if (!Objects.equals(discoveryPrefix, that.discoveryPrefix)) {
+			return false;
+		}
+		if (!Objects.equals(hostInfo, that.hostInfo)) {
+			return false;
+		}
+		if (!Objects.equals(ipAddress, that.ipAddress)) {
+			return false;
+		}
+		return Objects.equals(hostname, that.hostname);
 	}
 
 	@Override
@@ -223,6 +204,60 @@ public class EtcdDiscoveryProperties {
 	public String toString() {
 		return String.format(
 				"EtcdDiscoveryProperties{enabled=%s, discoveryPrefix='%s', hostInfo=%s, ipAddress='%s', hostname='%s', preferIpAddress=%s, ttl=%d, heartbeatInterval=%d}",
-				enabled, discoveryPrefix, hostInfo, ipAddress, hostname, preferIpAddress, ttl, heartbeatInterval);
+				enabled, discoveryPrefix, hostInfo, ipAddress, hostname, preferIpAddress,
+				ttl, heartbeatInterval);
 	}
+
+	private class HostInfo {
+
+		private final String ipAddress;
+
+		private final String hostname;
+
+		HostInfo(String ipAddress, String hostname) {
+			this.ipAddress = ipAddress;
+			this.hostname = hostname;
+		}
+
+		public String getIpAddress() {
+			return ipAddress;
+		}
+
+		public String getHostname() {
+			return hostname;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
+
+			HostInfo hostInfo = (HostInfo) o;
+
+			if (!ipAddress.equals(hostInfo.ipAddress)) {
+				return false;
+			}
+
+			return hostname.equals(hostInfo.hostname);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = ipAddress.hashCode();
+			result = 31 * result + hostname.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("HostInfo{ipAddress='%s', hostname='%s'}", ipAddress,
+					hostname);
+		}
+
+	}
+
 }

@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,9 @@ import org.springframework.core.env.PropertySource;
  * @author Spencer Gibb
  */
 public class EtcdPropertySourceLocator implements PropertySourceLocator {
+
 	private final EtcdClient etcd;
+
 	private final EtcdConfigProperties properties;
 
 	public EtcdPropertySourceLocator(EtcdClient etcd, EtcdConfigProperties properties) {
@@ -59,7 +61,8 @@ public class EtcdPropertySourceLocator implements PropertySourceLocator {
 			Collections.reverse(contexts);
 
 			for (String context : contexts) {
-				EtcdPropertySource propertySource = new EtcdPropertySource(context, etcd, properties);
+				EtcdPropertySource propertySource = new EtcdPropertySource(context, etcd,
+						properties);
 				propertySource.init();
 
 				composite.addPropertySource(propertySource);
@@ -84,4 +87,5 @@ public class EtcdPropertySourceLocator implements PropertySourceLocator {
 			contexts.add(ctx + this.properties.getProfileSeparator() + profile);
 		}
 	}
+
 }

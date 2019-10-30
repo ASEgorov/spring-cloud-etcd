@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,18 @@
 
 package org.springframework.cloud.etcd.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import mousio.etcd4j.EtcdClient;
 import mousio.etcd4j.responses.EtcdException;
 import mousio.etcd4j.responses.EtcdKeysResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Luca Burgazzoli
@@ -37,15 +38,18 @@ public class EtcdPropertySource extends EnumerablePropertySource<EtcdClient> {
 	private static final Log log = LogFactory.getLog(EtcdPropertySource.class);
 
 	private final Map<String, String> properties;
+
 	private final String prefix;
+
 	private final EtcdConfigProperties config;
 
-	public EtcdPropertySource(String root, EtcdClient source, EtcdConfigProperties config) {
+	public EtcdPropertySource(String root, EtcdClient source,
+			EtcdConfigProperties config) {
 		super(root, source);
 		this.properties = new HashMap<>();
-		this.prefix = root.startsWith(EtcdConstants.PATH_SEPARATOR) ? root
-				+ EtcdConstants.PATH_SEPARATOR : EtcdConstants.PATH_SEPARATOR + root
-				+ EtcdConstants.PATH_SEPARATOR;
+		this.prefix = root.startsWith(EtcdConstants.PATH_SEPARATOR)
+				? root + EtcdConstants.PATH_SEPARATOR
+				: EtcdConstants.PATH_SEPARATOR + root + EtcdConstants.PATH_SEPARATOR;
 		this.config = config;
 	}
 
@@ -59,9 +63,11 @@ public class EtcdPropertySource extends EnumerablePropertySource<EtcdClient> {
 			}
 		}
 		catch (EtcdException e) {
-			if (e.errorCode == 100) {//key not found, no need to print stack trace
-				log.warn("Unable to init property source: " + getName() + ", " + e.getMessage());
-			} else {
+			if (e.errorCode == 100) { // key not found, no need to print stack trace
+				log.warn("Unable to init property source: " + getName() + ", "
+						+ e.getMessage());
+			}
+			else {
 				log.warn("Unable to init property source: " + getName(), e);
 			}
 		}
@@ -99,4 +105,5 @@ public class EtcdPropertySource extends EnumerablePropertySource<EtcdClient> {
 			}
 		}
 	}
+
 }

@@ -11,11 +11,26 @@
 	<parent>
 		<groupId>org.springframework.cloud</groupId>
 		<artifactId>spring-cloud-etcd</artifactId>
-		<version>1.0.0.BUILD-SNAPSHOT</version>
+		<version>2.2.0.BUILD-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<optional>true</optional>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-etcd-core</artifactId>
@@ -25,13 +40,15 @@
 			<artifactId>spring-cloud-context</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.netflix.archaius</groupId>
-			<artifactId>archaius-core</artifactId>
-		</dependency>
-		<!-- archaius dep -->
-		<dependency>
-			<groupId>commons-configuration</groupId>
-			<artifactId>commons-configuration</artifactId>
+			<groupId>org.springframework.retry</groupId>
+			<artifactId>spring-retry</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>org.springframework</groupId>
+					<artifactId>spring-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

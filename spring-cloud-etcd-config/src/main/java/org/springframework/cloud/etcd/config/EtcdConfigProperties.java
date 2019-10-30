@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +16,10 @@
 
 package org.springframework.cloud.etcd.config;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Luca Burgazzoli
@@ -26,11 +27,17 @@ import java.util.concurrent.TimeUnit;
  */
 @ConfigurationProperties("spring.cloud.etcd.config")
 public class EtcdConfigProperties {
+
 	private boolean enabled = true;
+
 	private String prefix = "config";
+
 	private String defaultContext = "application";
+
 	private String profileSeparator = "-";
+
 	private int timeout = 1;
+
 	private TimeUnit timeoutUnit = TimeUnit.SECONDS;
 
 	public EtcdConfigProperties() {
@@ -86,18 +93,32 @@ public class EtcdConfigProperties {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
 		EtcdConfigProperties that = (EtcdConfigProperties) o;
 
-		if (enabled != that.enabled) return false;
-		if (timeout != that.timeout) return false;
-		if (prefix != null ? !prefix.equals(that.prefix) : that.prefix != null) return false;
-		if (defaultContext != null ? !defaultContext.equals(that.defaultContext) : that.defaultContext != null)
+		if (enabled != that.enabled) {
 			return false;
-		if (profileSeparator != null ? !profileSeparator.equals(that.profileSeparator) : that.profileSeparator != null)
+		}
+		if (timeout != that.timeout) {
 			return false;
+		}
+		if (!Objects.equals(prefix, that.prefix)) {
+			return false;
+		}
+		if (!Objects.equals(defaultContext, that.defaultContext)) {
+			return false;
+		}
+		if (!Objects.equals(profileSeparator, that.profileSeparator)) {
+			return false;
+		}
+
 		return timeoutUnit == that.timeoutUnit;
 	}
 
@@ -106,7 +127,8 @@ public class EtcdConfigProperties {
 		int result = (enabled ? 1 : 0);
 		result = 31 * result + (prefix != null ? prefix.hashCode() : 0);
 		result = 31 * result + (defaultContext != null ? defaultContext.hashCode() : 0);
-		result = 31 * result + (profileSeparator != null ? profileSeparator.hashCode() : 0);
+		result = 31 * result
+				+ (profileSeparator != null ? profileSeparator.hashCode() : 0);
 		result = 31 * result + timeout;
 		result = 31 * result + (timeoutUnit != null ? timeoutUnit.hashCode() : 0);
 		return result;
@@ -114,6 +136,9 @@ public class EtcdConfigProperties {
 
 	@Override
 	public String toString() {
-		return String.format("EtcdConfigProperties{enabled=%s, prefix='%s', defaultContext='%s', profileSeparator='%s', timeout=%d, timeoutUnit=%s}", enabled, prefix, defaultContext, profileSeparator, timeout, timeoutUnit);
+		return String.format(
+				"EtcdConfigProperties{enabled=%s, prefix='%s', defaultContext='%s', profileSeparator='%s', timeout=%d, timeoutUnit=%s}",
+				enabled, prefix, defaultContext, profileSeparator, timeout, timeoutUnit);
 	}
+
 }

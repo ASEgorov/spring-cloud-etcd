@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,17 +16,19 @@
 
 package org.springframework.cloud.etcd.discovery;
 
+import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.TimeoutException;
+
 import mousio.etcd4j.EtcdClient;
 import mousio.etcd4j.responses.EtcdException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.cloud.client.discovery.AbstractDiscoveryLifecycle;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * @author Spencer Gibb
@@ -36,7 +38,9 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 	private static final Log log = LogFactory.getLog(EtcdLifecycle.class);
 
 	private final EtcdClient etcd;
+
 	private final EtcdDiscoveryProperties props;
+
 	private final Service service = new Service();
 
 	public EtcdLifecycle(EtcdClient etcd, EtcdDiscoveryProperties props) {
@@ -54,7 +58,9 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 		register(service);
 	}
 
-	@Scheduled(initialDelayString = "${spring.cloud.etcd.discovery.heartbeatInterval:25000}", fixedRateString = "${spring.cloud.etcd.discovery.heartbeatInterval:25000}")
+	@Scheduled(
+			initialDelayString = "${spring.cloud.etcd.discovery.heartbeatInterval:25000}",
+			fixedRateString = "${spring.cloud.etcd.discovery.heartbeatInterval:25000}")
 	protected void sendHeartbeat() {
 		register();
 	}
@@ -73,10 +79,11 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 		try {
 			log.info("Registering service with etcd: " + service);
 			String key = getServiceKey(service.appName, service.getId());
-			//TODO: what should be serialized about the service?
+			// TODO: what should be serialized about the service?
 			String value = props.getHostname() + ":" + service.getPort();
 			etcd.put(key, value).ttl(props.getTtl()).send().get();
-		} catch (IOException | TimeoutException | EtcdException e) {
+		}
+		catch (IOException | TimeoutException | EtcdException e) {
 			ReflectionUtils.rethrowRuntimeException(e);
 		}
 	}
@@ -89,15 +96,108 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 		return props.getDiscoveryPrefix() + "/" + appName;
 	}
 
-	class Service {
-		String appName;
-		String id;
-		Integer port;
+	@Override
+	protected int getConfiguredPort() {
+		return service.getPort() == null ? 0 : service.getPort();
+	}
 
-		public Service() {
+	@Override
+	protected void setConfiguredPort(int port) {
+		service.setPort(port);
+	}
+
+	@Override
+	protected EtcdDiscoveryProperties getConfiguration() {
+		return props;
+	}
+
+	@Override
+	protected void deregister() {
+		deregister(getAppName(), getContext().getId());
+	}
+
+	@Override
+	protected void deregisterManagement() {
+		deregister(getAppName(), getManagementServiceName());
+	}
+
+	private void deregister(String appName, String serviceId) {
+		try {
+			etcd.delete(getServiceKey(appName, serviceId)).send();
+		}
+		catch (IOException e) {
+			ReflectionUtils.rethrowRuntimeException(e);
+		}
+	}
+
+	@Override
+	protected boolean isEnabled() {
+		return props.isEnabled();
+	}
+
+	public EtcdClient getEtcd() {
+		return etcd;
+	}
+
+	public EtcdDiscoveryProperties getProps() {
+		return props;
+	}
+
+	public Service getService() {
+		return service;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
 		}
 
-		public Service(String appName, String id, Integer port) {
+		EtcdLifecycle that = (EtcdLifecycle) o;
+
+		if (!Objects.equals(etcd, that.etcd)) {
+			return false;
+		}
+
+		if (!Objects.equals(props, that.props)) {
+			return false;
+		}
+
+		if (service != null ? !service.equals(that.service) : that.service != null) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int result = etcd != null ? etcd.hashCode() : 0;
+		result = 31 * result + (props != null ? props.hashCode() : 0);
+		result = 31 * result + (service != null ? service.hashCode() : 0);
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("EtcdLifecycle{etcd=%s, props=%s, service=%s}", etcd, props,
+				service);
+	}
+
+	class Service {
+
+		String appName;
+
+		String id;
+
+		Integer port;
+
+		Service() {
+		}
+
+		Service(String appName, String id, Integer port) {
 			this.appName = appName;
 			this.id = id;
 			this.port = port;
@@ -129,14 +229,23 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 
 			Service service = (Service) o;
 
-			if (appName != null ? !appName.equals(service.appName) : service.appName != null) return false;
-			if (id != null ? !id.equals(service.id) : service.id != null) return false;
-			return port != null ? port.equals(service.port) : service.port == null;
+			if (!Objects.equals(appName, service.appName)) {
+				return false;
+			}
+			if (!Objects.equals(id, service.id)) {
+				return false;
+			}
+
+			return Objects.equals(port, service.port);
 		}
 
 		@Override
@@ -149,84 +258,10 @@ public class EtcdLifecycle extends AbstractDiscoveryLifecycle {
 
 		@Override
 		public String toString() {
-			return String.format("Service{appName='%s', id='%s', port=%d}", appName, id, port);
+			return String.format("Service{appName='%s', id='%s', port=%d}", appName, id,
+					port);
 		}
+
 	}
 
-	@Override
-	protected int getConfiguredPort() {
-		return service.getPort() == null? 0 : service.getPort();
-	}
-
-	@Override
-	protected void setConfiguredPort(int port) {
-		service.setPort(port);
-	}
-
-	@Override
-	protected EtcdDiscoveryProperties getConfiguration() {
-		return props;
-	}
-
-	@Override
-	protected void deregister() {
-		deregister(getAppName(), getContext().getId());
-	}
-
-	@Override
-	protected void deregisterManagement() {
-		deregister(getAppName(), getManagementServiceName());
-	}
-
-	private void deregister(String appName, String serviceId) {
-		try {
-			etcd.delete(getServiceKey(appName, serviceId)).send();
-		} catch (IOException e) {
-			ReflectionUtils.rethrowRuntimeException(e);
-		}
-	}
-
-	@Override
-	protected boolean isEnabled() {
-		return props.isEnabled();
-	}
-
-	public EtcdClient getEtcd() {
-		return etcd;
-	}
-
-	public EtcdDiscoveryProperties getProps() {
-		return props;
-	}
-
-	public Service getService() {
-		return service;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		EtcdLifecycle that = (EtcdLifecycle) o;
-
-		if (etcd != null ? !etcd.equals(that.etcd) : that.etcd != null) return false;
-		if (props != null ? !props.equals(that.props) : that.props != null) return false;
-		if (service != null ? !service.equals(that.service) : that.service != null) return false;
-
-		return true;
-	}
-
-	@Override
-	public int hashCode() {
-		int result = etcd != null ? etcd.hashCode() : 0;
-		result = 31 * result + (props != null ? props.hashCode() : 0);
-		result = 31 * result + (service != null ? service.hashCode() : 0);
-		return result;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("EtcdLifecycle{etcd=%s, props=%s, service=%s}", etcd, props, service);
-	}
 }

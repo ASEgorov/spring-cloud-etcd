@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,25 +16,27 @@
 
 package org.springframework.cloud.etcd;
 
+import java.util.Objects;
+
 import mousio.etcd4j.EtcdClient;
 
-import org.springframework.boot.actuate.endpoint.AbstractEndpoint;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
+import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 
 /**
  * @author Spencer Gibb
+ * @author Aleksandr Egorov
  */
-@ConfigurationProperties(prefix = "endpoints.etcd", ignoreUnknownFields = false)
-public class EtcdEndpoint extends AbstractEndpoint<EtcdEndpoint.Data> {
+@Endpoint
+public class EtcdEndpoint {
 
 	private EtcdClient etcd;
 
 	public EtcdEndpoint(EtcdClient etcd) {
-		super("etcd", false, true);
 		this.etcd = etcd;
 	}
 
-	@Override
+	@ReadOperation
 	public Data invoke() {
 		Data data = new Data();
 		data.setVersion(etcd.getVersion());
@@ -42,6 +44,7 @@ public class EtcdEndpoint extends AbstractEndpoint<EtcdEndpoint.Data> {
 	}
 
 	public static class Data {
+
 		private String version;
 
 		public Data() {
@@ -61,12 +64,16 @@ public class EtcdEndpoint extends AbstractEndpoint<EtcdEndpoint.Data> {
 
 		@Override
 		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
+			if (this == o) {
+				return true;
+			}
+			if (o == null || getClass() != o.getClass()) {
+				return false;
+			}
 
 			Data data = (Data) o;
 
-			return version != null ? version.equals(data.version) : data.version == null;
+			return Objects.equals(version, data.version);
 		}
 
 		@Override
@@ -78,5 +85,7 @@ public class EtcdEndpoint extends AbstractEndpoint<EtcdEndpoint.Data> {
 		public String toString() {
 			return String.format("Data{version='%s'}", version);
 		}
+
 	}
+
 }

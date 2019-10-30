@@ -1,11 +1,11 @@
 /*
- * Copyright 2013-2015 the original author or authors.
+ * Copyright 2013-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,18 +16,21 @@
 
 package org.springframework.cloud.etcd;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-
-import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @author Spencer Gibb
  */
 @ConfigurationProperties("spring.cloud.etcd")
 public class EtcdProperties {
+
 	@NotNull
 	private List<URI> uris = Arrays.asList(URI.create("http://localhost:4001"));
 
@@ -59,13 +62,19 @@ public class EtcdProperties {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
 
 		EtcdProperties that = (EtcdProperties) o;
 
-		if (enabled != that.enabled) return false;
-		return uris != null ? uris.equals(that.uris) : that.uris == null;
+		if (enabled != that.enabled) {
+			return false;
+		}
+		return Objects.equals(uris, that.uris);
 	}
 
 	@Override
@@ -79,4 +88,5 @@ public class EtcdProperties {
 	public String toString() {
 		return String.format("EtcdProperties{uris=%s, enabled=%s}", uris, enabled);
 	}
+
 }
